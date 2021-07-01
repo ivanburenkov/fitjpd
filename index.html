@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1024">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <!-- <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.83.1"> -->
+    <title>Light source reconstruction</title>
+
+    <style>html {
+      /* default font-size is 16px - this is set in the default browser stylesheet */ 
+      font-size: 16px; 
+      font-weight: 400; 
+      line-height: 1.5; 
+    }</style>
+
+    
+
+    <!-- Bootstrap core CSS -->
+<link href="bootstrapcss/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+    
+    <!-- Custom styles for this template -->
+    <link href="dashboard.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    
+<!--<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">-->
+  <header class="navbar navbar-expand-md navbar-dark fixed-top bg-dark shadow" style="padding-top:0; padding-bottom:0;">
+  <a class="navbar-brand col-md-4 col-lg-2 me-0 px-3" href="#">
+    <img src="bootstrapjs/favicon.ico" width="15%" height="15%" style="margin-right:5%; margin-left:-5%; margin-top:-12%;margin-bottom:-10%;">
+    Mode reconstruction</a>
+  <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" 
+  data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>    
+  </button>
+  <ul class="navbar-nav mr-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="https://ivanburenkov.github.io/"> <span class="fa-home" data-feather="home"></span></a>
+    </li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="fa-menu" data-feather="menu">
+      </a>
+      <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item active" href="https://ivanburenkov.github.io/genjpd">JPD generator</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/genrpd">PND generator</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="collapse multi-collapse" id="help">
+    <div class="card card-body">
+      <img src="img/PPLN.png" width="400px"></img>
+      This software can generate arbitrary probability distributions based on the known mode structure of a light field.
+      One of possible applications is mode structure reconstruction of the unknown light source. Conjugated (entangled) light measured with two photon number resolving detectors may also allow extraction of the overall detection efficiency of the experimental setup in both signal and idler arms.
+      <a id="killButton" class="btn btn-close" href="#help" data-toggle="collapse"></a>
+    </div>
+  </div>
+  <div class="collapse multi-collapse" id="refs">
+    <div class="card card-body">
+      <div class="container-fluid">
+        For details see our paper in <a class="link-secondary" href="https://journals.aps.org/pra/abstract/10.1103/PhysRevA.95.053806" target="_blank">PRA</a> or
+        <a class="link-secondary" href="https://arxiv.org/pdf/1704.05503" target="_blank">arXiv</a>.
+        For numerical algorithm details: <a class="link-secondary" href="https://doi.org/10.6028/jres.122.030" target="_blank">DOI</a>
+        <a id="killButton" class="btn btn-close" href="#refs" data-toggle="collapse"></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-group ms-auto" role="group" style="margin-right:5px;">
+    <span id="collapsed">
+      <button type="button" 
+      class="btn btn-secondary showHelp" 
+      data-bs-toggle="button"
+      data-toggle="collapse" 
+      href="#help" 
+      role="button" aria-expanded="false" 
+      aria-controls="help" 
+      autocomplete="off"
+      >Help
+      </button>
+
+      <button type="button" 
+      class="btn btn-secondary showRefs" 
+      data-bs-toggle="button"
+      data-toggle="collapse" 
+      href="#refs" 
+      role="button" aria-expanded="false" 
+      aria-controls="refs" 
+      autocomplete="off"
+      >References</button>
+    </span>
+    <!-- <span id="expandedHelp">
+      <button type="button" 
+      class="btn btn-secondary active hideHelp" 
+      data-bs-toggle="button"
+      data-toggle="collapse" 
+      href="#help" 
+      role="button" aria-expanded="true" 
+      aria-controls="help" 
+      autocomplete="off"
+      onclick="hideID('collapsed');hideID('expandedHelp');">Collapse
+      </button>
+    </span>
+    <span id="expandedRefs">
+      <button type="button" 
+      class="btn btn-secondary active hideRefs" 
+      data-bs-toggle="button"
+      data-toggle="collapse" 
+      href="#refs" 
+      role="button" aria-expanded="true" 
+      aria-controls="refs" 
+      autocomplete="off"
+      onclick="hideID('collapsed');hideID('expandedRefs');">Collapse
+      </button>
+    </span> -->
+  </div>
+
+  <!-- <ul class="navbar-nav px-3">
+    <li class="nav-item text-nowrap">
+      <a class="nav-link" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">First text</a>
+    </li>
+  </ul>
+  <ul class="navbar-nav px-3">
+    <li class="nav-item text-nowrap">
+      <a class="nav-link" data-toggle="collapse" href="#multiCollapseExample2" role="button" aria-expanded="false" aria-controls="multiCollapseExample2">Second text</a>
+    </li>
+  </ul>
+ -->
+</header>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-4 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <!-- <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">
+              <span data-feather="home"></span>
+              Dashboard
+            </a>
+          </li> -->
+            <span id="inputfileSpan">
+              <input  name="inputfile" type="file" accept="text/plain, .dat, .tsv"
+              id="inputfile" style="display: none;">
+              <label for="inputfile" type="button" 
+              class="btn btn-secondary" style="margin-left: 5px;">Load data file</label>
+          </span>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Add/remove light sources to the initial guess for reconstruction algorithm below:</span>
+            <a class="link-secondary" href="#" aria-label="Add a new report">
+              
+            </a>
+          </h6>
+          <li class="nav-item">
+              <a class="nav-link" href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                <span data-feather="shuffle"></span>Conjugated
+                <span class="fa-chevron-right" data-feather="chevron-right"></span>
+                <span class="fa-chevron-down" data-feather="chevron-down"></span>
+              </a>
+                <ul class="collapse list-unstyled" id="homeSubmenu">
+                  <li>
+                    <a class="nav-link" href="#" 
+                    title="Add conjugated thermal mode (Squeezed vacuum mode)"
+                    >
+                    <span>Thermal</span>
+                    <span
+                      data-feather="plus-circle" 
+                      onclick="addConjugatedThermalMode();return false;">
+                    </span>
+                    
+                  </a>
+                  <ol id="thermal-sources">
+                    <li id="cthli0">
+                      <div class="input-group" title="Enter average number of photons in this mode.">
+                        <input id="cth0"
+                          class="form-control form-control-light w-5" 
+                          type="number" 
+                          style="width: 30%; display:inline;margin-right: 2%;"
+                          min=0
+                          value="1" 
+                          aria-label="Thermal"
+                          class="form-inline">
+                          <!-- onchange="runCcode();return false;"> -->
+                        <div class="input-group-append">
+                            <span class="input-group-text" 
+                            title="averge number of photons"> ph </span>
+                        </div>
+                        <a style="padding:5px" 
+                          class="nav-link" 
+                          href="#" 
+                          title="Remove this source." 
+                          onclick="delConjugatedThermalMode('0');return false;">
+                          <span style="margin:5%" data-feather="minus-circle"></span>
+                        </a>
+                      </div>
+                    </li>
+                  </ol>
+                  </li>
+                  <li>
+                    <a class="nav-link" href="#" 
+                    title="Add conjugated Poisson mode"
+                    >
+                    <span>Poisson</span>
+                    <span
+                      data-feather="plus-circle" 
+                      onclick="addConjugatedPoissonMode();return false;">
+                    </span>
+                    
+                  </a>
+                  <ol id="poisson-sources">
+                  </ol>
+                  </li>
+                  <li>
+                    <a class="nav-link" href="#" 
+                    title="Add conjugated single-photon mode (ideal biohoton source)"
+                    >
+                    <span>Single-photon</span>
+                    <span
+                      data-feather="plus-circle" 
+                      onclick="addConjugatedSPMode();return false;">
+                    </span>
+                    
+                  </a>
+                  <ol id="sp-sources">
+                  </ol>
+                  </li>
+              </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#SignalSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+              <span data-feather="arrow-up-right"></span>Signal
+              <span class="fa-chevron-right" data-feather="chevron-right"></span>
+              <span class="fa-chevron-down" data-feather="chevron-down"></span>
+            </a>
+              <ul class="collapse list-unstyled" id="SignalSubmenu">
+                <li>
+                  <a class="nav-link" href="#" 
+                  title="Add signal thermal mode"
+                  >
+                  <span>Thermal</span>
+                  <span
+                    data-feather="plus-circle" 
+                    onclick="addSignalThermalMode();return false;">
+                  </span>
+                  
+                </a>
+                <ol id="sthermal-sources">
+                </ol>
+                </li>
+                <li>
+                  <a class="nav-link" href="#" 
+                  title="Add Siganl Poisson mode"
+                  >
+                  <span>Poisson</span>
+                  <span
+                    data-feather="plus-circle" 
+                    onclick="addSignalPoissonMode();return false;">
+                  </span>
+                  
+                </a>
+                <ol id="spoisson-sources">
+                </ol>
+                </li>
+                <li>
+                  <a class="nav-link" href="#" 
+                  title="Add conjugated single-photon mode (ideal biohoton source)"
+                  >
+                  <span>Single-photon</span>
+                  <span
+                    data-feather="plus-circle" 
+                    onclick="addSignalSPMode();return false;">
+                  </span>
+                  
+                </a>
+                <ol id="ssp-sources">
+                </ol>
+                </li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#IdlerSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+              <span data-feather="arrow-down-right"></span>Idler
+              <span class="fa-chevron-right" data-feather="chevron-right"></span>
+              <span class="fa-chevron-down" data-feather="chevron-down"></span>
+            </a>
+              <ul class="collapse list-unstyled" id="IdlerSubmenu">
+                <li>
+                  <a class="nav-link" href="#" 
+                  title="Add signal thermal mode"
+                  >
+                  <span>Thermal</span>
+                  <span
+                    data-feather="plus-circle" 
+                    onclick="addIdlerThermalMode();return false;">
+                  </span>
+                  
+                </a>
+                <ol id="ithermal-sources">
+                </ol>
+                </li>
+                <li>
+                  <a class="nav-link" href="#" 
+                  title="Add Idler Poisson mode"
+                  >
+                  <span>Poisson</span>
+                  <span
+                    data-feather="plus-circle" 
+                    onclick="addIdlerPoissonMode();return false;">
+                  </span>
+                  
+                </a>
+                <ol id="ipoisson-sources">
+                </ol>
+                </li>
+                <li>
+                  <a class="nav-link" href="#" 
+                  title="Add conjugated single-photon mode (ideal biohoton source)"
+                  >
+                  <span>Single-photon</span>
+                  <span
+                    data-feather="plus-circle" 
+                    onclick="addIdlerSPMode();return false;">
+                  </span>
+                  
+                </a>
+                <ol id="isp-sources">
+                </ol>
+                </li>
+            </ul>
+          </li>
+          <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Detection Efficiency (Conjugated modes)</span>
+            
+            <a class="link-secondary" href="#" aria-label="Add a new report">
+              
+            </a>
+          </h6>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span data-feather="aperture"></span>
+              Signal mode
+              <input id="sLoss"
+                          class="form-control form-control-light w-5" 
+                          type="number" 
+                          style="width: 50%; display:inline;margin-right: 2%;"
+                          min=0
+                          max=1
+                          step=0.1
+                          value="0.5" 
+                          aria-label="Loss"
+                          class="form-inline">
+                          <!-- onchange="runCcode();return false;"> -->
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              <span data-feather="aperture"></span>
+              Idler mode
+              <input id="iLoss"
+                          class="form-control form-control-light w-5" 
+                          type="number" 
+                          style="width: 50%; display:inline;margin-right: 2%;"
+                          min=0
+                          max=1
+                          step=0.1
+                          value="0.5" 
+                          aria-label="Loss"
+                          class="form-inline">
+                          <!-- onchange="runCcode();return false;"> -->
+            </a>
+          </li>
+          <li>
+            <button type="button" 
+              class="btn btn-secondary showHelp" 
+              onclick="runCcodeFit();return false;"
+              style="margin-left: 5px;"
+              >Reconstruct
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="col-md-8 ms-sm-auto col-lg-10 px-md-4" style="margin-top:48px;">
+      <div class="p-5 mb-4 bg-light rounded-3" id="fitIntro">
+        <div class="container-fluid py-5">
+          <h1 class="display-5 fw-bold" style="font-size:2rem;">Light source reconstruction</h1>
+          <p class="col-md-8 fs-4">
+            Please use sidebar to choose file in .tsv/.dat format with photon numer resolved counts or probability density values. See/use output of JPD generator as an example of data.
+          </p>
+        </div>
+      </div>
+ 
+<br>
+
+<div class="container">
+  <div class="row">
+      <div class="col-sm-3 col-md-4 col-lg-6" id='plotlyDivLabel'>
+       </div>
+      <div class="col-sm-3 col-md-4 col-lg-6" id='plotlyDivFitLabel'>
+      </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="fitjpd.js"> </script>
+
+<script type="text/javascript" src="main.js"> </script>
+<script type="text/javascript" src="sidebar.js"> </script>
+
+<div class="form-group purple-border" style="display: none;" id="tsvdata">
+  <label for="exampleFormControlTextarea5">
+    <button type="button" class="btn btn-secondary" onclick="CopyJPDToClipboard()">Copy JPD data
+    </button>
+    <button type="button" class="btn btn-secondary" onclick="CopyRPDToClipboard()">Copy RPDs data
+    </button>
+    <button type="button" class="btn btn-secondary" onclick="CopyFitToClipboard()">Copy Reconstruction data
+    </button>
+  </label>
+  <textarea class="form-control" id="datatsv" rows="3" readonly >
+  
+  </textarea>
+</div>
+
+
+ <a id="timing" class="btn btn-outline-secondary" href="#"></a>
+    </main>
+  </div>
+</div>
+
+
+    <script src="bootstrapjs/bootstrap.bundle.min.js"></script>
+
+      <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js" integrity="sha384-uO3SXW5IuS1ZpFPKugNNWqTZRRglnUJK6UAZ/gxOX80nxEkN9NcGZTftn6RzhGWE" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js" integrity="sha384-zNy6FEbO50N+Cg5wap8IKA4M/ZnLJgzc6w2NqACZaK0u0FXfOWRRJOnQtpZun8ha" crossorigin="anonymous"></script>
+      <!-- <script src="dashboard.js"></script> -->
+      <!-- jQuery CDN - Slim version (=without AJAX) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+          $('#sidebarCollapse').on('click', function () {
+              $('#sidebar').toggleClass('active');
+          });
+      });
+    </script>
+        
+    <script>
+      feather.replace()
+    </script>
+  </body>
+</html>
