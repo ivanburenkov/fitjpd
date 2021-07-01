@@ -62,8 +62,9 @@
         <span class="fa-menu" data-feather="menu">
       </a>
       <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item active" href="https://ivanburenkov.github.io/genjpd">JPD generator</a></li>
-        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/genrpd">PND generator</a></li>
+        <li><a class="dropdown-item active" href="https://ivanburenkov.github.io/genjpd">JPD reconstruction</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/genjpd">JPD generator</a></li>
+        <li><a class="dropdown-item" href="https://ivanburenkov.github.io/genrpd">PND generator</a></li
       </ul>
     </li>
   </ul>
@@ -71,8 +72,8 @@
   <div class="collapse multi-collapse" id="help">
     <div class="card card-body">
       <img src="img/PPLN.png" width="400px"></img>
-      This software can generate arbitrary probability distributions based on the known mode structure of a light field.
-      One of possible applications is mode structure reconstruction of the unknown light source. Conjugated (entangled) light measured with two photon number resolving detectors may also allow extraction of the overall detection efficiency of the experimental setup in both signal and idler arms.
+      This software can reconstruct light source mode structure using measured or generated photon number probability distributions. Current implementation will try to find average number of photons using initial guess of the mode structure of a light field.
+      This makes possible the reconstruction of the unknown light sources. Atomatic initial guess generation is in development. Conjugated (entangled) light measured with two photon number resolving detectors may also allow extraction of the overall detection efficiency of the experimental setup in both signal and idler arms.
       <a id="killButton" class="btn btn-close" href="#help" data-toggle="collapse"></a>
     </div>
   </div>
