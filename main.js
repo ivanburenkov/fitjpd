@@ -542,7 +542,7 @@ document.getElementById('inputfile')
 				//document.getElementById('output').textContent=fr.result;
 				var b = fr.result.split('\n')
 				var a=[];
-				height=b.length-1;
+				height=b.length; //check here
 				width=1;
 				for(const i in b){
 					a.push(b[i].split('\t').map(Number));
